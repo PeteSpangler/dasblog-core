@@ -25,7 +25,7 @@ namespace DasBlog.Web.Settings
 		private readonly string siteSecurityConfigFilePath;
 		private readonly ConfigFilePathsDataOption filePathDataOptions;
 
-		public DasBlogSettings(IWebHostEnvironment env, IOptionsMonitor<SiteConfig> siteConfig, IOptionsMonitor<MetaTags> metaTagsConfig, 
+		public DasBlogSettings(IWebHostEnvironment env, IOptionsMonitor<SiteConfig> siteConfig, IOptionsMonitor<MetaTags> metaTagsConfig,
 									ISiteSecurityConfig siteSecurityConfig, IOptions<ConfigFilePathsDataOption> optionsAccessor)
 		{
 			WebRootDirectory = env.ContentRootPath;
@@ -64,7 +64,7 @@ namespace DasBlog.Web.Settings
 		public string ShortCutIconUrl { get; }
 
 		public string ThemeCssUrl { get; }
-		
+
 		public IMetaTags MetaTags { get; set; }
 
 		public ISiteConfig SiteConfiguration { get; set;  }
