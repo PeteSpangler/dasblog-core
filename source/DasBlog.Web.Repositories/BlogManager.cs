@@ -29,6 +29,7 @@ namespace DasBlog.Managers
 		private readonly ILogger logger;
 		private static readonly Regex stripTags = new Regex("<[^>]*>", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 		private readonly IDasBlogSettings dasBlogSettings;
+		private const int COMMENT_PAGE_SIZE = 5;
 
 		public BlogManager( ILogger<BlogManager> logger, IDasBlogSettings dasBlogSettings)
 		{
@@ -363,10 +364,14 @@ namespace DasBlog.Managers
 			{
 				var targetComment = DateTime.UtcNow.AddDays(-1 * dasBlogSettings.SiteConfiguration.DaysCommentsAllowed);
 
-				if (targetComment > entry.CreatedUtc)
+				if ((targetComment > entry.CreatedUtc))
 				{
 					return CommentSaveState.PostCommentsDisabled;
 				}
+
+				// FilterHtml html encodes anything we don't like
+				string filteredText = dasBlogSettings.FilterHtml(comment.Content);
+				comment.Content = filteredText;
 
 				if (dasBlogSettings.SiteConfiguration.SendCommentsByEmail)
 				{
@@ -438,15 +443,38 @@ namespace DasBlog.Managers
 			return dataService.GetAllComments();
 		}
 
+		public List<Comment> GetCommentsFrontPage()
+		{
+			var comments = dataService.GetAllComments().OrderByDescending(d => d.CreatedUtc).ToList();
+
+			return comments.Take(COMMENT_PAGE_SIZE).ToList();
+		}
+
+		public List<Comment> GetCommentsForPage(int pageIndex)
+		{
+			var comments = dataService.GetAllComments().OrderByDescending(d => d.CreatedUtc).ToList();
+
+			return comments.Skip((pageIndex) * COMMENT_PAGE_SIZE).Take(COMMENT_PAGE_SIZE).ToList();
+		}
+
 		public CategoryCacheEntryCollection GetCategories()
 		{
 			return dataService.GetCategories();
 		}
 
+		private string GetFromEmail()
+		{
+			if (string.IsNullOrWhiteSpace(dasBlogSettings.SiteConfiguration.SmtpFromEmail))
+			{
+				return dasBlogSettings.SiteConfiguration.SmtpUserName?.Trim();
+			}
+
+			return dasBlogSettings.SiteConfiguration.SmtpFromEmail?.Trim();
+		}
 		public bool SendTestEmail()
 		{
 			var emailMessage = new MailMessage();
-			emailMessage.From = new MailAddress(dasBlogSettings.SiteConfiguration.SmtpUserName);
+			emailMessage.From = new MailAddress(GetFromEmail());
 			emailMessage.To.Add(dasBlogSettings.SiteConfiguration.NotificationEMailAddress);
 			emailMessage.To.Add(dasBlogSettings.SiteConfiguration.Contact);
 
@@ -535,7 +563,7 @@ namespace DasBlog.Managers
 			emailMessage.IsBodyHtml = false;
 			emailMessage.BodyEncoding = System.Text.Encoding.UTF8;
 
-			emailMessage.From = new MailAddress(dasBlogSettings.SiteConfiguration.SmtpUserName);
+			emailMessage.From = new MailAddress(GetFromEmail());
 
 			return dasBlogSettings.GetMailInfo(emailMessage);
 		}

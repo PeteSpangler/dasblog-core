@@ -100,6 +100,8 @@ namespace DasBlog.Services.ConfigFile.Interfaces
         bool SendPostsByEmail { get; set; }
         bool EnableAboutView { get; set; }
 
+        string TinyMCEApiKey { get; set; }
+        
         bool EnableBloggerApi { get; set; }
 
         bool EnableComments { get; set; }
@@ -236,6 +238,7 @@ namespace DasBlog.Services.ConfigFile.Interfaces
         bool EnableSmtpAuthentication { get; set; }
 
         string SmtpUserName { get; set; }
+        string SmtpFromEmail { get; set; }
 
         string SmtpPassword { get; set; }
 
@@ -346,7 +349,13 @@ namespace DasBlog.Services.ConfigFile.Interfaces
 
 		string SecurityStyleSources { get; set; }
 
+		string DefaultSources { get; set; }
+
 		bool CookieConsentEnabled { get; set; }
+
+		string MastodonServerUrl { get; set; }
+
+		string MastodonAccount { get; set; }
 
 		[XmlAnyElement]
         XmlElement[] anyElements { get; set; }

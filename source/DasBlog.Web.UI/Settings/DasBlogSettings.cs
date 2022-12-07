@@ -230,6 +230,10 @@ namespace DasBlog.Web.Settings
 			{
 				return false;
 			}
+			else if(SiteConfiguration.EnableComments && !SiteConfiguration.EnableCommentDays)
+			{
+				return true;
+			}
 
 			return (DateTime.UtcNow.AddDays(-1 * SiteConfiguration.DaysCommentsAllowed) < blogpostdate);
 		}
@@ -283,6 +287,25 @@ namespace DasBlog.Web.Settings
 			return new SendMailInfo(emailmessage, SiteConfiguration.SmtpServer,
 						   SiteConfiguration.EnableSmtpAuthentication, SiteConfiguration.UseSSLForSMTP,
 						   SiteConfiguration.SmtpUserName, SiteConfiguration.SmtpPassword, SiteConfiguration.SmtpPort);
+		}
+
+		public DateTime GetDisplayTime(DateTime datetime)
+		{
+			if (SiteConfiguration.AdjustDisplayTimeZone)
+			{
+				return datetime.AddHours(SiteConfiguration.DisplayTimeZoneIndex);
+			}
+			return datetime;
+		}
+
+		public DateTime GetCreateTime(DateTime datetime)
+		{
+			if (SiteConfiguration.AdjustDisplayTimeZone)
+			{
+				datetime = datetime.AddHours(-1 * SiteConfiguration.DisplayTimeZoneIndex);
+			}
+
+			return datetime;
 		}
 	}
 }

@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Razor.TagHelpers;
+﻿using DasBlog.Services;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace DasBlog.Web.TagHelpers.RichEdit
 {
 	public class TinyMceBuilder : IRichEditBuilder
 	{
-		private const string TINY_MCE_SERVICE_URL = "https://cloud.tinymce.com/stable/tinymce.min.js";
+		private readonly IDasBlogSettings dasBlogSettings;
+		private const string TINY_MCE_SERVICE_URL = "https://cdn.tiny.cloud/1/{0}/tinymce/5/tinymce.min.js";
 		private const string INIT_SCRIPT_TEMPLATE = @"
-		<script language=""javascript"" type=""text/javascript"" src=""/js/tinymce/plugins/code/plugin.min.js""></script>
 		<script>
 		tinymce.init({{
 			selector: '#{0}'
@@ -14,6 +15,11 @@ namespace DasBlog.Web.TagHelpers.RichEdit
 		}});
 		</script>
 		";
+
+		public TinyMceBuilder(IDasBlogSettings dasBlogSettings)
+		{
+			this.dasBlogSettings = dasBlogSettings;
+		}
 		
 		public void ProcessControl(RichEditTagHelper tagHelper, TagHelperContext context, TagHelperOutput output)
 		{
@@ -30,7 +36,7 @@ namespace DasBlog.Web.TagHelpers.RichEdit
 		{
 			output.TagName = "script";
 			output.TagMode = TagMode.StartTagAndEndTag;
-			output.Attributes.SetAttribute("src", TINY_MCE_SERVICE_URL);
+			output.Attributes.SetAttribute("src", string.Format(TINY_MCE_SERVICE_URL, dasBlogSettings.SiteConfiguration.TinyMCEApiKey));
 			output.Attributes.SetAttribute("type", "text/javascript");
 			output.Attributes.SetAttribute("language", "javascript");
 			string htmlContent = string.Format(INIT_SCRIPT_TEMPLATE, tagHeelper.ControlId);
